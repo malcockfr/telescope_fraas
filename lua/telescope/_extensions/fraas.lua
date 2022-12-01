@@ -12,7 +12,10 @@ local utils = require("telescope.utils")
 local sorters = require("telescope.sorters")
 
 local M = {
-  opts = {}
+  opts = {
+    io_account = nil,
+    terminal_cmd = nil,
+  }
 }
 
 local function set_config_state(opt_name, value, default)
