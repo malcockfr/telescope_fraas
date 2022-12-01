@@ -11,7 +11,7 @@ local pickers = require("telescope.pickers")
 local utils = require("telescope.utils")
 local sorters = require("telescope.sorters")
 
-M = {
+local M = {
   opts = {}
 }
 
