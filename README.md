@@ -20,15 +20,13 @@ In your Telescope sertup function (create on if needed) add the following,
 I've shown the default value here but feel free to change it, it needs the two %s
 placeholders which are the `project_name`:
 ```
-telescope.setup {
-  extensions = {
-    ...
-    fraas = {
-      terminal_cmd = "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s"
-    },
+lvim.builtin.telescope.extensions.fraas = {
+  fraas = {
+    terminal_cmd = "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s"
   },
 }
 ```
+
 
 Then run `:PackerSync` to install it.
 
