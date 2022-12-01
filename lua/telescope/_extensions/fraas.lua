@@ -57,6 +57,22 @@ M.fraas_projects = function(opts)
         local selection = action_state.get_selected_entry()
         vim.fn.system(string.format(M.opts.terminal_cmd, selection.name, selection.name))
       end)
+      actions.open_gcp_console = function()
+        actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        vim.api.nvim_command(string.format("OpenBrowser https://console.cloud.google.com/getting-started?authuser=%s&project=%s"
+          , M.opts.io_account, selection.id))
+      end
+      actions.open_stackdriver = function()
+        actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        vim.api.nvim_command(string.format("OpenBrowser https://console.cloud.google.com/logs/query?authuser=%s&project=%s"
+          , M.opts.io_account, selection.id))
+      end
+
+      map('n', 'b', actions.open_gcp_console)
+      map('n', 'l', actions.open_gcp_console)
+
       return true
     end,
   }):find()
@@ -66,6 +82,7 @@ return telescope.register_extension {
   setup = function(ext_config)
     set_config_state("terminal_cmd", ext_config.terminal_cmd,
       "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
+    set_config_state("io_account", ext_config.io_account, "")
   end,
   exports = {
     fraas = M.fraas_projects,

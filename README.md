@@ -26,7 +26,7 @@ lvim.builtin.telescope.on_config_done = function(telescope)
   telescope.load_extension "fraas"
 end
 ```
-In your Telescope sertup function (create on if needed) add the following,
+In your Telescope setup function (create on if needed) add the following,
 I've shown the default value here but feel free to change it, it needs the two %s
 placeholders which are the `project_name`:
 ```
