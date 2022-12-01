@@ -55,7 +55,6 @@ M.fraas_projects = function(opts)
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
-        print(vim.inspect(M))
         vim.fn.system(string.format(M.opts.terminal_cmd, selection.name, selection.name))
       end)
       actions.open_gcp_console = function()
@@ -83,10 +82,10 @@ end
 -- M.fraas_projects()
 
 return telescope.register_extension {
-  setup = function(ext_config, config)
-    set_config_state("terminal_cmd", config.terminal_cmd,
+  setup = function(ext_config)
+    set_config_state("terminal_cmd", ext_config.terminal_cmd,
       "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
-    set_config_state("io_account", config.io_account, "")
+    set_config_state("io_account", ext_config.io_account, "")
   end,
   exports = {
     fraas = M.fraas_projects,
