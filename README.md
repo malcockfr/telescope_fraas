@@ -15,7 +15,17 @@ lvim.plugins = {
   }
 } 
 ```
+Then run `:PackerSync` to install it.
 
+## Setup
+
+Tell Telescope to load the extension
+```
+lvim.builtin.telescope.on_config_done = function(telescope)
+  ...
+  telescope.load_extension "fraas"
+end
+```
 In your Telescope sertup function (create on if needed) add the following,
 I've shown the default value here but feel free to change it, it needs the two %s
 placeholders which are the `project_name`:
@@ -25,18 +35,6 @@ lvim.builtin.telescope.extensions.fraas = {
     terminal_cmd = "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s"
   },
 }
-```
-
-
-Then run `:PackerSync` to install it.
-
-## Setup
-
-Tell Telescope to load the extension
-```
-lvim.builtin.telescope.on_config_done = function(telescope)
-  telescope.load_extension "fraas"
-end
 ```
 
 ## Using it :)
