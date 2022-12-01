@@ -62,8 +62,6 @@ M.fraas_projects = function(opts)
   }):find()
 end
 
-M.fraas_projects()
-
 return telescope.register_extension {
   setup = function(ext_config)
     set_config_state("terminal_cmd", ext_config.terminal_cmd,
