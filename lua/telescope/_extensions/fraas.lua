@@ -81,14 +81,14 @@ M.fraas_projects = function(opts)
   }):find()
 end
 -- set_config_state("terminal_cmd", nil, "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
--- set_config_state("io_account", , "")
+-- set_config_state("io_account", nil, "")
 -- M.fraas_projects()
 
 return telescope.register_extension {
-  setup = function(ext_config, config)
-    set_config_state("terminal_cmd", config.terminal_cmd,
+  setup = function(ext_config)
+    set_config_state("terminal_cmd", ext_config.terminal_cmd,
       "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
-    set_config_state("io_account", config.io_account, "")
+    set_config_state("io_account", ext_config.io_account, "")
   end,
   exports = {
     fraas = M.fraas_projects,
