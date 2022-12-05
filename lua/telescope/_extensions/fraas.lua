@@ -8,8 +8,9 @@ local action_state = require("telescope.actions.state")
 local actions = require("telescope.actions")
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
-local utils = require("telescope.utils")
 local sorters = require("telescope.sorters")
+local utils = require("telescope.utils")
+local job = require("plenary.job")
 
 local M = {
   opts = {
@@ -22,9 +23,31 @@ local function set_config_state(opt_name, value, default)
   M.opts[opt_name] = value == nil and default or value
 end
 
+-- Override utils.get_os_command_output() with added 30s timeout
+local function get_os_command_output(cmd, cwd)
+  if type(cmd) ~= "table" then
+    utils.notify("get_os_command_output", {
+      msg = "cmd has to be a table",
+      level = "ERROR",
+    })
+    return {}
+  end
+  local command = table.remove(cmd, 1)
+  local stderr = {}
+  local stdout, ret = job:new({
+    command = command,
+    args = cmd,
+    cwd = cwd,
+    on_stderr = function(_, data)
+      table.insert(stderr, data)
+    end,
+  }):sync(30000)
+  return stdout, ret, stderr
+end
+
 local get_fraas_projects = function()
   local cwd = vim.fn.getcwd()
-  local results = utils.get_os_command_output({ "gcloud", "projects", "list" }, cwd)
+  local results = get_os_command_output({ "gcloud", "projects", "list" }, cwd)
 
   local entries = {}
   for _, project in ipairs(results) do
@@ -80,6 +103,7 @@ M.fraas_projects = function(opts)
     end,
   }):find()
 end
+
 -- set_config_state("terminal_cmd", nil, "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
 -- set_config_state("io_account", nil, "")
 -- M.fraas_projects()
