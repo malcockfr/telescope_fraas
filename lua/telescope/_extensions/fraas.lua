@@ -107,7 +107,7 @@ M.fraas_projects = function(opts)
       end
 
       map('n', 'b', actions.open_io_gcp_console)
-      map('n', 's', actions.open_sa_gcp_console)
+      map('n', 'B', actions.open_sa_gcp_console)
       map('n', 'l', actions.open_stackdriver)
 
       return true
