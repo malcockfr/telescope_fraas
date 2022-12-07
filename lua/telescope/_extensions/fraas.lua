@@ -15,6 +15,7 @@ local job = require("plenary.job")
 local M = {
   opts = {
     io_account = nil,
+    sa_account = nil,
     terminal_cmd = nil,
   }
 }
@@ -60,6 +61,11 @@ local get_fraas_projects = function()
   return entries
 end
 
+local open_gcp_console = function(account, id)
+  vim.api.nvim_command(string.format("OpenBrowser https://console.cloud.google.com/getting-started?authuser=%s&project=%s"
+    , account, id))
+end
+
 M.fraas_projects = function(opts)
   pickers.new(opts, {
     prompt_title = string.format("FRaaS Projects"),
@@ -83,11 +89,15 @@ M.fraas_projects = function(opts)
         local selection = action_state.get_selected_entry()
         vim.fn.system(string.format(M.opts.terminal_cmd, selection.name, selection.name))
       end)
-      actions.open_gcp_console = function()
+      actions.open_io_gcp_console = function()
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
-        vim.api.nvim_command(string.format("OpenBrowser https://console.cloud.google.com/getting-started?authuser=%s&project=%s"
-          , M.opts.io_account, selection.id))
+        open_gcp_console(M.opts.io_account, selection.id)
+      end
+      actions.open_sa_gcp_console = function()
+        actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        open_gcp_console(M.opts.sa_account, selection.id)
       end
       actions.open_stackdriver = function()
         actions.close(prompt_bufnr)
@@ -96,8 +106,9 @@ M.fraas_projects = function(opts)
           , M.opts.io_account, selection.id))
       end
 
-      map('n', 'b', actions.open_gcp_console)
-      map('n', 'l', actions.open_gcp_console)
+      map('n', 'b', actions.open_io_gcp_console)
+      map('n', 'B', actions.open_sa_gcp_console)
+      map('n', 'l', actions.open_stackdriver)
 
       return true
     end,
@@ -113,6 +124,7 @@ return telescope.register_extension {
     set_config_state("terminal_cmd", ext_config.terminal_cmd,
       "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
     set_config_state("io_account", ext_config.io_account, "")
+    set_config_state("sa_account", string.gsub(ext_config.io_account, "@", "-sa@"))
   end,
   exports = {
     fraas = M.fraas_projects,

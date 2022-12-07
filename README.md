@@ -30,11 +30,18 @@ In your Telescope setup function (create on if needed) add the following,
 I've shown the default value here but feel free to change it, it needs the two %s
 placeholders which are the `project_name`:
 ```
-lvim.builtin.telescope.extensions.fraas = {
-  fraas = {
-    terminal_cmd = "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s"
-  },
-}
+lvim.builtin.telescope.on_config_done = function(telescope)
+  telescope.setup {
+    extensions = {
+      fraas = {
+        terminal_cmd = "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s",
+        io_account = "io_user_account",
+      }
+    }
+  }
+
+  pcall(telescope.load_extension "fraas")
+end
 ```
 
 ## Using it :)
