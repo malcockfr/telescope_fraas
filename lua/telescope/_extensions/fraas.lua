@@ -85,7 +85,7 @@ M.fraas_projects = function(opts)
     sorter = sorters.get_generic_fuzzy_sorter(),
     attach_mappings = function(prompt_bufnr, map)
       actions.select_default:replace(function()
-        actions.close(prompt_bufnr)
+        -- actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
         vim.fn.system(string.format(M.opts.terminal_cmd, selection.name, selection.name))
       end)
