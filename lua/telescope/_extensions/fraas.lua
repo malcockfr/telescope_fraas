@@ -67,10 +67,6 @@ local open_gcp_console = function(account, id)
 end
 
 M.fraas_projects = function(opts)
-  utils.notify("fraas", {
-    msg = "Searching for projects, just a moment please.....",
-    level = "INFO",
-  })
   pickers.new(opts, {
     prompt_title = string.format("FRaaS Projects"),
     finder = finders.new_table {
