@@ -17,6 +17,7 @@ local M = {
     io_account = nil,
     sa_account = nil,
     terminal_cmd = nil,
+    staging_context = nil,
   }
 }
 
@@ -56,6 +57,23 @@ local get_fraas_projects = function()
       "([%w%p]+)%s*([%w%p]+)%s*(%d+)")
     if id ~= "PROJECT_ID" then
       table.insert(entries, { project, id, name, number })
+    end
+  end
+  return entries
+end
+
+local get_fraas_tests = function()
+  local cwd = vim.fn.getcwd()
+  local results = get_os_command_output({ "kubectl", "get", "testruns", "--context",
+    "--context", M.opts.staging_context,
+    "--output=custom-columns=\"ID:.status.runId,STATE:.status.state,BRANCH:spec.prBranchName,WHO:.spec.createdBy,SLACK:.status.slackThreadTs\"" }
+    , cwd)
+  local entries = {}
+  for _, project in ipairs(results) do
+    local id, status, branch, createdby, slackThread = string.match(project,
+      "([%w%p]+)%s*(%w+)%s*(%w+)%s*(%w+)%s*(%w+)%s*(%w+)")
+    if id ~= "ID" then
+      table.insert(entries, { id, status, branch, createdby, slackThread })
     end
   end
   return entries
@@ -115,6 +133,33 @@ M.fraas_projects = function(opts)
   }):find()
 end
 
+M.fraas_tests = function(opts)
+  pickers.new(opts, {
+    prompt_title = string.format("FRaaS E2E tests"),
+    finder = finders.new_table {
+      results = get_fraas_tests(),
+      entry_maker = function(entry)
+        return {
+          value = entry[1],
+          display = string.format("%s\t%s\t\t%s\t%s", entry[1], entry[2], entry[3], entry[4]),
+          ordinal = entry[4],
+          slackThread = entry[5],
+        }
+      end
+    },
+    sorter = sorters.get_generic_fuzzy_sorter(),
+    attach_mappings = function(prompt_bufnr, map)
+      actions.select_default:replace(function()
+        -- actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        vim.api.nvim_command(string.format("OpenBrowser https://forgerock.slack.com/archives/C010WEFEMRV/p%s"
+          , selection.slackThread:gsub('.', '')))
+      end)
+      return true
+    end,
+  }):find()
+end
+
 -- set_config_state("terminal_cmd", nil, "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
 -- set_config_state("io_account", nil, "")
 -- M.fraas_projects()
@@ -125,9 +170,11 @@ return telescope.register_extension {
       "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
     set_config_state("io_account", ext_config.io_account, "")
     set_config_state("sa_account", string.gsub(ext_config.io_account, "@", "-sa@"))
+    set_config_state("staging_context", ext_config.staging_context, "gke_terraforged-66994cf9-acf8_us-west1_staging")
   end,
   exports = {
     fraas = M.fraas_projects,
     projects = M.fraas_projects,
+    tests = M.fraas_tests,
   },
 }
