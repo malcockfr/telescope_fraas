@@ -70,6 +70,7 @@ local get_fraas_tests = function()
     , cwd)
   local entries = {}
   for _, testrun in ipairs(results) do
+    testrun:gsub("%s+", "")
     local id, state, branch, createdBy, slackThread, name = string.match(testrun,
       "(%w+),(%w+),([%w%p%Z]*),([%w%s%p]+),([%s%p%Z]*),([%w%p]+)")
     table.insert(entries, { id, state, branch, createdBy, slackThread, name })
