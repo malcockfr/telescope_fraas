@@ -188,10 +188,10 @@ M.fraas_tests = function(opts)
   }):find()
 end
 
-set_config_state("terminal_cmd", nil, "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
-set_config_state("io_account", nil, "")
-set_config_state("staging_context", nil, "gke_terraforged-66994cf9-acf8_us-west1_staging")
-M.fraas_tests()
+-- set_config_state("terminal_cmd", nil, "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
+-- set_config_state("io_account", nil, "")
+-- set_config_state("staging_context", nil, "gke_terraforged-66994cf9-acf8_us-west1_staging")
+-- M.fraas_tests()
 
 return telescope.register_extension {
   setup = function(ext_config)
