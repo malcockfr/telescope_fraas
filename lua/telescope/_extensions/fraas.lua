@@ -22,6 +22,14 @@ local M = {
   }
 }
 
+local test_state = {
+  Running = "🚀",
+  Finished = "🏁",
+  Failed = "❌",
+  Terminating = "☠️",
+  Provisioning = "🚧",
+}
+
 local function set_config_state(opt_name, value, default)
   M.opts[opt_name] = value == nil and default or value
 end
@@ -72,7 +80,7 @@ local get_fraas_tests = function()
   for _, testrun in ipairs(results) do
     local id, state, branch, createdBy, slackThread, name = string.match(testrun,
       "(%w+),(%w+),([%w%p%Z]*),([%w%s%p]+),([%s%p%Z]*),([%w%p]+)")
-    if id ~= "" then
+    if id ~= nil then
       table.insert(entries, { id, state, branch, createdBy, slackThread, name })
     end
   end
@@ -141,10 +149,13 @@ M.fraas_tests = function(opts)
       entry_maker = function(entry)
         return {
           value = entry[1],
-          display = string.format("%s\t%s\t%s\t%s", entry[1], entry[2], entry[3], entry[4]),
+          display = string.format("%s\t-\t%s\t-\t%s", test_state[entry[2]], entry[1], entry[4]),
           ordinal = entry[4],
           slackThread = entry[5],
           name = entry[6],
+          id = entry[1],
+          branch = entry[3],
+          state = entry[2]
         }
       end
     },
@@ -153,7 +164,10 @@ M.fraas_tests = function(opts)
       title = "Test run details",
       define_preview = function(self, entry, status)
         vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, {
-          entry.name,
+          string.format("Name:\t\t\t%s", entry.name),
+          string.format("ID:\t\t\t\t%s", entry.id),
+          string.format("Branch:\t\t%s", entry.branch),
+          string.format("State:\t\t%s", entry.state),
         })
       end
     },
@@ -164,15 +178,20 @@ M.fraas_tests = function(opts)
         vim.api.nvim_command(string.format("OpenBrowser https://forgerock.slack.com/archives/C010WEFEMRV/p%s"
           , selection.slackThread:gsub('%.', '')))
       end)
+      actions.terminate_testrun = function()
+        -- actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        vim.fn.system(string.format("kubectl --context %s delete testrun %s", M.staging_context, selection.name))
+      end
       return true
     end,
   }):find()
 end
 
--- set_config_state("terminal_cmd", nil, "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
--- set_config_state("io_account", nil, "")
--- set_config_state("staging_context", nil, "gke_terraforged-66994cf9-acf8_us-west1_staging")
--- M.fraas_tests()
+set_config_state("terminal_cmd", nil, "gnome-terminal --tab --title %s -- /usr/local/bin/forge shell %s")
+set_config_state("io_account", nil, "")
+set_config_state("staging_context", nil, "gke_terraforged-66994cf9-acf8_us-west1_staging")
+M.fraas_tests()
 
 return telescope.register_extension {
   setup = function(ext_config)
