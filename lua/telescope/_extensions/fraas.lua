@@ -152,10 +152,11 @@ M.fraas_tests = function(opts)
           display = string.format("%s\t-\t%s\t-\t%s", test_state[entry[2]], entry[1], entry[4]),
           ordinal = entry[4],
           slackThread = entry[5],
-          name = entry[6],
           id = entry[1],
+          state = entry[2],
           branch = entry[3],
-          state = entry[2]
+          name = entry[6],
+          created = entry[7],
         }
       end
     },
@@ -168,6 +169,7 @@ M.fraas_tests = function(opts)
           string.format("ID:\t\t\t\t%s", entry.id),
           string.format("Branch:\t\t%s", entry.branch),
           string.format("State:\t\t%s", entry.state),
+          string.format("Created:\t\t%s", entry.created),
         })
       end
     },
