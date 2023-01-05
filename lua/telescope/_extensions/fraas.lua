@@ -74,14 +74,14 @@ end
 local get_fraas_tests = function()
   local cwd = vim.fn.getcwd()
   local results, _, stderr = get_os_command_output({ "kubectl", "get", "testruns", "--context", M.opts.staging_context,
-    "--output=jsonpath={range .items[*]}{.status.runId}{\",\"}{.status.state}{\",\"}{.spec.prBranchName}{\",\"}{.spec.createdBy}{\",\"}{.status.slackThreadTs}{\",\"}{.metadata.name}{\"\\n\"}" }
+    "--output=jsonpath={range .items[*]}{.status.runId}{\",\"}{.status.state}{\",\"}{.spec.prBranchName}{\",\"}{.spec.createdBy}{\",\"}{.status.slackThreadTs}{\",\"}{.metadata.name}{\",\"}{.metadata.creationTimestamp}{\"\\n\"}" }
     , cwd)
   local entries = {}
   for _, testrun in ipairs(results) do
-    local id, state, branch, createdBy, slackThread, name = string.match(testrun,
-      "(%w+),(%w+),([%w%p%Z]*),([%w%s%p]+),([%s%p%Z]*),([%w%p]+)")
+    local id, state, branch, createdBy, slackThread, name, created = string.match(testrun,
+      "(%w+),(%w+),([%w%p%Z]*),([%w%s%p]+),([%s%p%Z]*),([%w%p]+),([%w%p]+)")
     if id ~= nil then
-      table.insert(entries, { id, state, branch, createdBy, slackThread, name })
+      table.insert(entries, { id, state, branch, createdBy, slackThread, name, created })
     end
   end
   return entries
@@ -168,6 +168,55 @@ M.fraas_tests = function(opts)
           string.format("ID:\t\t\t\t%s", entry.id),
           string.format("Branch:\t\t%s", entry.branch),
           string.format("State:\t\t%s", entry.state),
+        })
+      end
+    },
+    attach_mappings = function(prompt_bufnr, map)
+      actions.select_default:replace(function()
+        -- actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        vim.api.nvim_command(string.format("OpenBrowser https://forgerock.slack.com/archives/C010WEFEMRV/p%s"
+          , selection.slackThread:gsub('%.', '')))
+      end)
+      actions.terminate_testrun = function()
+        -- actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        vim.fn.system(string.format("kubectl --context %s delete testrun %s", M.staging_context, selection.name))
+      end
+      return true
+    end,
+  }):find()
+end
+
+M.fraas_orch = function(opts)
+  pickers.new(opts, {
+    prompt_title = string.format("FRaaS Argo Workflow runs"),
+    finder = finders.new_table {
+      results = get_fraas_tests(),
+      entry_maker = function(entry)
+        return {
+          value = entry[1],
+          display = string.format("%s\t-\t%s\t-\t%s", test_state[entry[2]], entry[1], entry[4]),
+          ordinal = entry[4],
+          slackThread = entry[5],
+          id = entry[1],
+          state = entry[2],
+          branch = entry[3],
+          name = entry[6],
+          created = entry[7],
+        }
+      end
+    },
+    sorter = sorters.get_generic_fuzzy_sorter(),
+    previewer = previewers.new_buffer_previewer {
+      title = "Test run details",
+      define_preview = function(self, entry, status)
+        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, {
+          string.format("Name:\t\t\t%s", entry.name),
+          string.format("ID:\t\t\t\t%s", entry.id),
+          string.format("Branch:\t\t%s", entry.branch),
+          string.format("State:\t\t%s", entry.state),
+          string.format("Created:\t\t%s", entry.created),
         })
       end
     },
