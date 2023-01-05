@@ -165,10 +165,10 @@ M.fraas_tests = function(opts)
       title = "Test run details",
       define_preview = function(self, entry, status)
         vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, {
-          string.format("Name:\t\t\t%s", entry.name),
-          string.format("ID:\t\t\t\t%s", entry.id),
-          string.format("Branch:\t\t%s", entry.branch),
-          string.format("State:\t\t%s", entry.state),
+          string.format("Name:\t\t\t\t%s", entry.name),
+          string.format("ID:\t\t\t\t\t%s", entry.id),
+          string.format("Branch:\t\t\t%s", entry.branch),
+          string.format("State:\t\t\t%s", entry.state),
           string.format("Created:\t\t%s", entry.created),
         })
       end
