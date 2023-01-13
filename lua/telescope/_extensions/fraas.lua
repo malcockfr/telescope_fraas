@@ -220,7 +220,7 @@ M.fraas_argo = function(opts)
       entry_maker = function(entry)
         return {
           value = entry[1],
-          display = string.format("%s\t%s\t%s\t%s\t%s", entry[1], states[entry[2]], entry[3], entry[4], entry[6]),
+          display = string.format("%s\t%s", states[entry[2]], entry[1]),
           ordinal = entry[1],
           name = entry[1],
           age = entry[3],
