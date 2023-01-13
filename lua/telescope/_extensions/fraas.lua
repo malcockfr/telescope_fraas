@@ -288,5 +288,6 @@ return telescope.register_extension {
     fraas = M.fraas_projects,
     projects = M.fraas_projects,
     tests = M.fraas_tests,
+    argo = M.fraas_argo,
   },
 }
