@@ -240,7 +240,7 @@ M.fraas_argo = function(opts)
           string.format("Duration:\t\t%s", entry.duration),
           string.format("Priority:\t\t%s", entry.pri),
           string.format("Message:"),
-          "------------------------------",
+          string.rep("-", vim.api.nvim_win_get_width(0)),
           entry.message,
         })
       end
